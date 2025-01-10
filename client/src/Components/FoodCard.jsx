@@ -1,14 +1,19 @@
 import React, { useContext } from "react";
 import { AuthContext } from "../Providers/AuthProvider";
 import useAuth from "../Hooks/useAuth";
-import Swal from 'sweetalert2'
+import Swal from "sweetalert2";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import useAxiosSecure from "../Hooks/useAxiosSecure";
+import useCart from "../Hooks/useCart";
 const FoodCard = ({ item }) => {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const { image, price, recipe, name , _id } = item;
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { image, price, recipe, name, _id } = item;
   const { user } = useAuth();
+  const axiosSecure = useAxiosSecure();
+  const [,refetch] = useCart()
+
   const handleAddToCart = (food) => {
     console.log(food);
     console.log(user);
@@ -16,25 +21,27 @@ const FoodCard = ({ item }) => {
       //TODO: send data to the database
       console.log(user.email);
       const cartItem = {
-        menuId : _id ,
+        menuId: _id,
         email: user.email,
         name,
         image,
         price,
-      }
-      axios.post('http://localhost:5000/carts',cartItem)
-      .then(res => {
+      };
+
+      axiosSecure.post("/carts", cartItem).then((res) => {
         console.log(res.data);
-        if(res.data.insertedId){
-          Swal.fire({ 
+        if (res.data.insertedId) {
+          Swal.fire({
             position: "top-end",
             icon: "success",
             title: `${name} added to the cart`,
             showConfirmButton: false,
-            timer: 1500
+            timer: 1500,
           });
+          //! refetch the data after sending data to the db to update the cart
+          refetch()
         }
-      })
+      });
     } else {
       Swal.fire({
         title: "You are not logged in",
@@ -47,7 +54,7 @@ const FoodCard = ({ item }) => {
       }).then((result) => {
         if (result.isConfirmed) {
           //!send user to the login page
-          navigate('/login' , {state:{from : location}})
+          navigate("/login", { state: { from: location } });
         }
       });
     }
@@ -67,7 +74,7 @@ const FoodCard = ({ item }) => {
           <p>{recipe}</p>
           <div className="card-actions justify-end">
             <button
-              onClick={() => handleAddToCart(item)}
+              onClick={handleAddToCart}
               className="btn btn-outline border-0 border-b-4 mt-4 uppercase bg-slate-100 border-orange-400 hover:text-orange-400"
             >
               add to cart
