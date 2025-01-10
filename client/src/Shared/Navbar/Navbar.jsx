@@ -1,7 +1,16 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Link } from "react-router-dom";
-
+import { AuthContext } from "../../Providers/AuthProvider";
+import { FaOpencart } from "react-icons/fa";
 const Navbar = () => {
+  const { user, logout } = useContext(AuthContext);
+  const handleLogout = () => {
+    logout()
+      .then(() => {})
+      .catch((error) => {
+        console.log(error);
+      });
+  };
   const navOptions = (
     <>
       <li>
@@ -12,6 +21,31 @@ const Navbar = () => {
       </li>
       <li>
         <Link to={"/order/salad"}>Order Food</Link>
+      </li>
+      {user ? (
+        <>
+          <li>
+            <button onClick={handleLogout} className="btn btn-ghost">
+              Logout
+            </button>
+          </li>
+        </>
+      ) : (
+        <>
+          <li>
+            <Link className="btn btn-ghost" to={"/login"}>
+              login
+            </Link>
+          </li>
+        </>
+      )}
+      <li>
+        <Link>
+          <button className="btn btn-outline text-white">
+          <FaOpencart className="text-2xl" />
+            <div className="badge badge-secondary">+2</div>
+          </button>
+        </Link>
       </li>
     </>
   );
@@ -39,17 +73,20 @@ const Navbar = () => {
             <ul
               tabIndex={0}
               className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
-            >{navOptions}</ul>
+            >
+              {navOptions}
+            </ul>
           </div>
           <a className="btn btn-ghost text-xl">BISTRO BOSS</a>
         </div>
         <div className="navbar-center hidden lg:flex">
-          <ul className="menu menu-horizontal px-1">
-                {navOptions}
+          <ul className="menu menu-horizontal px-1 items-center justify-center">
+            {navOptions}
           </ul>
         </div>
         <div className="navbar-end">
-          <a className="btn">Button</a>
+          {/* <a className="btn">{user.displayName}</a>
+          <img src={user.photoURL} width="40px" alt="" /> */}
         </div>
       </div>
     </>
