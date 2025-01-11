@@ -42,7 +42,7 @@ const Navbar = () => {
         </>
       )}
       <li>
-        <Link>
+        <Link to={"/dashboard/cart"}>
           <button className="btn btn-outline text-white">
           <FaOpencart className="text-2xl" />
             <div className="badge badge-secondary">+{cart.length}</div>
