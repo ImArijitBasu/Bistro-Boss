@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require("express");
 const app = express();
 require("dotenv").config();
@@ -38,12 +38,23 @@ async function run() {
     });
 
     // Carts collection
+    app.get('/carts' , async(req,res) =>{
+      const email = req.query.email;
+      const query = {email : email}
+      const result = await cartCollection.find(query).toArray();
+      res.send(result)
+    })
     app.post('/carts' , async(req,res) =>{
       const cartItem = req.body;
       const result = await cartCollection.insertOne(cartItem)
       res.send(result);
     })
-
+    app.delete('/carts/:id' , async(req,res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await cartCollection.deleteOne(query);
+      res.send(result);
+    })
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
