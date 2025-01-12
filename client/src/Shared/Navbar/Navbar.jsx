@@ -87,8 +87,8 @@ const Navbar = () => {
           </ul>
         </div>
         <div className="navbar-end">
-          {/* <a className="btn">{user.displayName}</a>
-          <img src={user.photoURL} width="40px" alt="" /> */}
+          <img src={user?.photoURL} width="40px" className="rounded-full" alt="" />
+          <a className="btn btn-circle">{user?.displayName}</a>
         </div>
       </div>
     </>
