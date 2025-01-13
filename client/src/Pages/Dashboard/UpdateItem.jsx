@@ -1,3 +1,4 @@
+import { useLoaderData } from "react-router-dom";
 import React from "react";
 import SectionTitle from "../../Components/SectionTitle";
 import { useForm } from "react-hook-form";
@@ -7,50 +8,51 @@ import useAxiosSecure from "../../Hooks/useAxiosSecure";
 import Swal from "sweetalert2";
 
 const image_hosting_key = import.meta.env.VITE_IMAGE_HOSTING_KEY;
-const image_hosting_api = `https://api.imgbb.com/1/upload?key=${image_hosting_key}`
-const AddItems = () => {
-  const { register, handleSubmit ,reset} = useForm();
-  const axiosPublic = useAxiosPublic()
-  const axiosSecure = useAxiosSecure()
+const image_hosting_api = `https://api.imgbb.com/1/upload?key=${image_hosting_key}`;
+const UpdateItem = () => {
+  const item = useLoaderData();
+  console.log(item);
+  const { register, handleSubmit, reset } = useForm();
+  const axiosPublic = useAxiosPublic();
+  const axiosSecure = useAxiosSecure();
   const onSubmit = async (data) => {
     console.log(data);
-    const imageFile = {image: data.image[0]}
-    const res = await axiosPublic.post(image_hosting_api ,imageFile ,{
-        headers: {
-            'Content-Type' : "multipart/form-data"
-        }
-    } )
-    if(res.data.success){
-        // now send the menu item data to the db
-        const menuItem = {
-            name: data.name,
-            recipe: data.recipe,
-            image: res.data.data.display_url,
-            category: data.category,
-            price: parseFloat(data.price),
-        };
-        // send data using axios secure as only admin can add new items
-        const menuRes = await axiosSecure.post('/menu' , menuItem);
-        console.log(menuRes.data);
-        if(menuRes.data.insertedId){
-            reset()
-            Swal.fire({
-                position: "top-end",
-                icon: "success",
-                title: `${data.name} is added to the Menu`,
-                showConfirmButton: false,
-                timer: 1500
-              });
-        }
+    const imageFile = { image: data.image[0] };
+    const res = await axiosPublic.post(image_hosting_api, imageFile, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    if (res.data.success) {
+      // now send the menu item data to the db
+      const menuItem = {
+        name: data.name,
+        recipe: data.recipe,
+        image: res.data.data.display_url,
+        category: data.category,
+        price: parseFloat(data.price),
+      };
+      // send data using axios secure as only admin can add new items
+      const menuRes = await axiosSecure.patch(`/menu/${item._id}`, menuItem);
+      console.log(menuRes.data);
+      if (menuRes.data.modifiedCount > 0) {
+        reset();
+        Swal.fire({
+          position: "top-end",
+          icon: "success",
+          title: `${data.name} is Updated to the Menu`,
+          showConfirmButton: false,
+          timer: 1500,
+        });
+      }
     }
     console.log(res.data);
-    
   };
   return (
-    <div className="bg-gray-100">
+    <div>
       <SectionTitle
-        heading={"add an item"}
-        subHeading={"what's new"}
+        heading={"update item"}
+        subHeading={"refresh info"}
       ></SectionTitle>
       <div className="">
         {/* //! form */}
@@ -60,8 +62,9 @@ const AddItems = () => {
               <span className="label-text">Recipe Name *</span>
             </div>
             <input
-              {...register("name" ,{required: true})}
+              {...register("name")}
               type="text"
+              defaultValue={item?.name}
               placeholder="Recipe Name"
               className="input input-bordered w-full"
             />
@@ -73,8 +76,8 @@ const AddItems = () => {
                 <span className="label-text">Category*</span>
               </div>
               <select
-              defaultValue={"default"}
-                {...register("category" ,{required: true})}
+                defaultValue={item?.category}
+                {...register("category")}
                 className="select select-bordered w-full"
               >
                 <option disabled value="default">
@@ -93,8 +96,9 @@ const AddItems = () => {
                 <span className="label-text">Price *</span>
               </div>
               <input
-                {...register("price" ,{required: true})}
+                {...register("price")}
                 type="number"
+                defaultValue={item?.price}
                 placeholder="Price"
                 className="input input-bordered w-full"
               />
@@ -105,19 +109,26 @@ const AddItems = () => {
               <span className="label-text">Recipe *</span>
             </div>
             <textarea
-            {...register("recipe" ,{required: true})}
+              {...register("recipe")}
               className="textarea textarea-bordered h-24"
-              placeholder="Bio"
+              placeholder="Recipe"
+              defaultValue={item?.recipe}
             ></textarea>
           </label>
           <div className="form-control">
-            <input {...register("image" ,{required: true})} type="file" className="file-input w-full max-w-xs" />
+            <input
+              {...register("image")}
+              type="file"
+              className="file-input w-full max-w-xs"
+            />
           </div>
-          <button className="btn bg-orange-400">Add Item <FaUtensils></FaUtensils></button>
+          <button className="btn bg-orange-400">
+            Update Item <FaUtensils></FaUtensils>
+          </button>
         </form>
       </div>
     </div>
   );
 };
 
-export default AddItems;
+export default UpdateItem;
